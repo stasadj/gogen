@@ -1,0 +1,9 @@
+Arpeggio==2.0.0
+click==8.1.3
+colorama==0.4.4
+future==0.18.2
+-e git+git@github.com:stasadj/gogen.git@2cb4bb592b7977f878d9e2cb52d77c1dff29e970#egg=gogen
+Jinja2==3.1.2
+MarkupSafe==2.1.1
+silvera==0.3.1
+textX==3.0.0
