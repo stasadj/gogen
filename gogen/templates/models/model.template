@@ -8,6 +8,6 @@
 package models
 
 type {{service_name}} struct {
-	ID        int    `json:"id"`
-	FirstName string `json:"name"`
+    ID        int    `json:"id"`
+    FirstName string `json:"name"`
 }

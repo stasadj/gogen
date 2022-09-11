@@ -8,14 +8,14 @@ import (
 )
 
 func main() {
-	client := eureka.NewClient(&eureka.Config{
-		DefaultZone:           "{{reg_url}}:{{reg_port}}/eureka/",
-		App:                   "{{service_name}}",
-		Port:                  {{service_port}},
-		RenewalIntervalInSecs: 10,
-		DurationInSecs:        30,
-		Metadata: map[string]interface{}{
-			"VERSION":              "{{service_version}}",
+    client := eureka.NewClient(&eureka.Config{
+        DefaultZone:           "{{reg_url}}:{{reg_port}}/eureka/",
+        App:                   "{{service_name}}",
+        Port:                  {{service_port}},
+        RenewalIntervalInSecs: 10,
+        DurationInSecs:        30,
+        Metadata: map[string]interface{}{
+            "VERSION":              "{{service_version}}",
             "NODE_GROUP_ID":        0,
             "PRODUCT_CODE":         "DEFAULT",
             "PRODUCT_VERSION_CODE": "DEFAULT",
@@ -25,7 +25,6 @@ func main() {
     })
     client.Start()
 
-    
     srv := api.NewServer()
     http.ListenAndServe(":{{service_port}}", srv)
 }
