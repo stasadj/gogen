@@ -1,11 +1,12 @@
 package main
 
 import (
-	"context"
-	"os"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"net/http"
+	"{{service_name}}/api"
 )
 
 func main() {
+    
+   srv := api.NewServer()
+   http.ListenAndServe("{{service_port}}", srv)
 }

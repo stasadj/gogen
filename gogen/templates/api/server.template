@@ -1,0 +1,45 @@
+package api
+
+import (
+	"encoding/json"
+	"net/http"
+	"{{service_name}}/models"
+
+	"github.com/gorilla/mux"
+)
+
+type Server struct {
+	*mux.Router
+}
+
+func NewServer() *Server {
+	s := &Server{
+		Router: mux.NewRouter(),
+	}
+	s.routes()
+	return s
+}
+
+func (s *Server) routes() {
+    // Auto-generated CRUD methods
+    {% if "@read" in crud_dict %}
+	s.HandleFunc("/{{service_name|lower}}/{id}", s.read()).Methods("GET")
+    {% endif %}
+}
+
+{% if "@read" in crud_dict %}
+func (s *Server) read() http.HandlerFunc{
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		t:= models.{{service_name}}{
+			ID:1,
+			FirstName:"Hello World",
+		}
+
+		if err := json.NewEncoder(w).Encode(t); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+}
+{% endif %}
