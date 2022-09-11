@@ -2,4 +2,8 @@ module {{service_name}}
 
 go 1.18
 
-require github.com/gorilla/mux v1.8.0
+require (
+    github.com/gorilla/mux v1.8.0
+    github.com/xuanbo/eureka-client v0.0.5
+    github.com/xuanbo/requests v0.0.1 // indirect
+)

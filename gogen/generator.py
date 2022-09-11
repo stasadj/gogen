@@ -118,11 +118,13 @@ class ServiceGenerator:
 
         d = {
             "service_name": service.name.lower(),
-            "service_port": ":%s" % service.port,
+            "service_port": service.port,
             "service_version": service.version,
             "use_circuit_breaker": len(service.dependencies) > 0,
             "timestamp": timestamp(),
-            "uses_registry": service.service_registry is not None
+            "uses_registry": service.service_registry is not None,
+            "reg_port": service.service_registry.port,
+            "reg_url": service.service_registry.url,
         }
 
         # Generate root files

@@ -1,12 +1,31 @@
 package main
 
 import (
-	"net/http"
-	"{{service_name}}/api"
+    "net/http"
+    "{{service_name}}/api"
+
+    eureka "github.com/xuanbo/eureka-client"
 )
 
 func main() {
+	client := eureka.NewClient(&eureka.Config{
+		DefaultZone:           "{{reg_url}}:{{reg_port}}/eureka/",
+		App:                   "{{service_name}}",
+		Port:                  {{service_port}},
+		RenewalIntervalInSecs: 10,
+		DurationInSecs:        30,
+		Metadata: map[string]interface{}{
+			"VERSION":              "{{service_version}}",
+            "NODE_GROUP_ID":        0,
+            "PRODUCT_CODE":         "DEFAULT",
+            "PRODUCT_VERSION_CODE": "DEFAULT",
+            "PRODUCT_ENV_CODE":     "DEFAULT",
+            "SERVICE_VERSION_CODE": "DEFAULT",
+        },
+    })
+    client.Start()
+
     
-   srv := api.NewServer()
-   http.ListenAndServe("{{service_port}}", srv)
+    srv := api.NewServer()
+    http.ListenAndServe(":{{service_port}}", srv)
 }
