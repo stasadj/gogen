@@ -70,7 +70,7 @@ class ServiceGenerator:
         templates_path = get_templates_path()
         env = Environment(loader=FileSystemLoader(templates_path))
 
-        d = {"name": self.service.name}
+        d = {"service_name": self.service.name.lower()}
         for template_name, ext in [("run_sh", "sh"), ("run_cmd", "cmd")]:
             run_template = env.get_template("%s.template" % template_name)
 
