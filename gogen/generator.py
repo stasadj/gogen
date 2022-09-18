@@ -41,9 +41,30 @@ class ServiceGenerator:
 
         return env
 
+    def get_typedefs(self, service):
+        """For given service returns type with typedef names and type of the
+        ID attribute
+        Args:
+            service (ServiceDecl): service declaration
+        Returns:
+            tuple
+        """
+        typedefs = []
+        for t in service.api.typedefs:
+            if not t.crud:
+                continue
+            # if ID is not specified, the type of generated key will be str
+            id_datatype = "str"
+            for field in t.fields:
+                if field.isid:
+                    id_datatype = field.type
+
+            typedefs.append((t.name, id_datatype, t.crud_dict))
+        return typedefs
+
     def generate_main(self, env, root, d):
         """
-        Generate main file: main.go
+        Generates main file: main.go
                Args:
                    env (Environment): jinja2 environment used during generation.
                    root (str): path to the dir where application root is located
@@ -54,7 +75,7 @@ class ServiceGenerator:
 
     def generate_mod(self, env, root, d):
         """
-        Generate mod file: go.mod
+        Generates mod file: go.mod
                Args:
                    env (Environment): jinja2 environment used during generation.
                    root (str): path to the dir where application root is located
@@ -84,7 +105,7 @@ class ServiceGenerator:
 
     def generate_api(self, env, root, d):
         """
-        Generate api: server.go
+        Generates api: server.go
                Args:
                    env (Environment): jinja2 environment used during generation.
                    root (str): path to the dir where application root is located
@@ -96,7 +117,7 @@ class ServiceGenerator:
 
     def generate_models(self, env, root):
         """
-        Generate models folder
+        Generates models folder
                 Args:
                     env (Environment): jinja2 environment used during generation.
                     root (str): path to the dir where application root is located
@@ -123,17 +144,16 @@ class ServiceGenerator:
                 "id_attr": id_attr,
                 "timestamp": timestamp()
             }
-            model_template.stream(data).dump(os.path.join(models_path,
-                                                          typedef.name.lower() + ".go"))
+            model_template.stream(data).dump(os.path.join(models_path, typedef.name.lower() + ".go"))
 
     def generate_repositories(self, env, root):
         """
-        Generate repositories folder
+        Generates repositories folder
                 Args:
                     env (Environment): jinja2 environment used during generation.
                     root (str): path to the dir where application root is located
          """
-        repo_path = create_if_missing(os.path.join(root, "repositories"))
+        repos_path = create_if_missing(os.path.join(root, "repositories"))
 
         api = self.service.api
 
@@ -150,9 +170,34 @@ class ServiceGenerator:
                 "typedef": typedef.name,
                 "id_datatype": id_datatype
             }
-            class_template = env.get_template("repositories/repository.template")
-            class_template.stream(data).dump(os.path.join(repo_path,
-                                                          typedef.name.lower() + "_repository.go"))
+            repo_template = env.get_template("repositories/repository.template")
+            repo_template.stream(data).dump(os.path.join(repos_path, typedef.name.lower() + "_repository.go"))
+
+    def generate_services(self, env, root):
+        """
+        Generates services folder
+                Args:
+                    env (Environment): jinja2 environment used during generation.
+                    root (str): path to the dir where application root is located
+         """
+        services_path = create_if_missing(os.path.join(root, "services"))
+        service = self.service
+        service_name = service.name.lower()
+
+        typedefs = self.get_typedefs(service)
+
+        service_data = {
+            "service_name": service_name,
+            "functions": service.api.functions,
+            "typedefs": typedefs,
+            "dep_names": [s.name for s in service.dependencies],
+            "timestamp": timestamp(),
+            "consumers": service.f_consumers,
+        }
+
+        service_template = env.get_template("services/service.template")
+        service_template.stream(service_data).dump(os.path.join(services_path, service_name + "_service.go"))
+
 
     def generate(self, output_dir):
         """
@@ -192,6 +237,9 @@ class ServiceGenerator:
 
         # Generate repositories
         self.generate_repositories(env, root)
+
+        # Generate services
+        self.generate_services(env, root)
 
 
 def generate(decl, output_dir, debug):
