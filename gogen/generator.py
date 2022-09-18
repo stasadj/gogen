@@ -1,7 +1,7 @@
 import os
 from jinja2 import Environment, FileSystemLoader
 from silvera.generator.registration import GeneratorDesc
-from gogen.utils import get_templates_path, timestamp, create_if_missing
+from gogen.utils import get_templates_path, timestamp, create_if_missing, convert_complex_type
 
 
 def generate_service(service, output_dir):
@@ -34,6 +34,7 @@ class ServiceGenerator:
         env = Environment(loader=FileSystemLoader(self._templates_path))
         env.filters["firstupper"] = lambda x: x[0].upper() + x[1:]
         env.filters["firstlower"] = lambda x: x[0].lower() + x[1:]
+        env.filters["converttype"] = lambda x: convert_complex_type(x)
 
         return env
 
@@ -90,17 +91,37 @@ class ServiceGenerator:
         server_template = env.get_template("api/server.template")
         server_template.stream(d).dump((os.path.join(api_path, "server.go")))
 
-    def generate_models(self, env, root, d):
+    def generate_models(self, env, root):
         """
         Generate models: models.go
                 Args:
                     env (Environment): jinja2 environment used during generation.
                     root (str): path to the dir where application root is located
-                    d (dict): dict with variables for templates
          """
         models_path = create_if_missing(os.path.join(root, "models"))
         model_template = env.get_template("models/model.template")
-        model_template.stream(d).dump((os.path.join(models_path, self.service.name.lower()+".go")))
+
+        api = self.service.api
+
+        for typedef in api.typedefs:
+
+            attrs = typedef.fields
+            id_attr = None
+            for attr in attrs:
+                if attr.isid:
+                    id_attr = {"name": attr.name,
+                               "type": attr.type}
+
+            data = {
+                "dependency": False,
+                "service_name": self.service.name,
+                "name": typedef.name,
+                "attributes": attrs,
+                "id_attr": id_attr,
+                "timestamp": timestamp()
+            }
+            model_template.stream(data).dump(os.path.join(models_path,
+                                                          typedef.name.lower() + ".go"))
 
     def generate(self, output_dir):
         """
@@ -136,7 +157,7 @@ class ServiceGenerator:
         self.generate_api(env, root, d)
 
         # Generate models
-        self.generate_models(env, root, d)
+        self.generate_models(env, root)
 
 
 def generate(decl, output_dir, debug):

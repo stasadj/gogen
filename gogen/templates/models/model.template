@@ -7,7 +7,20 @@
 
 package models
 
-type {{service_name}} struct {
-    ID        int    `json:"id"`
-    FirstName string `json:"name"`
+{% macro validate(attr) -%}
+    {%- if attr.isid -%}
+    `bson:"_id,omitempty" json:"id"`
+    {%- elif attr.required -%}
+    `bson:"{{attr.name|lower}},omitempty" json:"{{attr.name|lower}}"`
+    {%- else -%}
+    `bson:"{{attr.name|lower}}" json:"{{attr.name|lower}}"`
+    {%- endif -%}
+{%- endmacro -%}
+type {{name}} struct {
+    {% if not id_attr -%}
+    ID		string	`bson:"_id,omitempty" json:"id"`
+    {%- endif %}
+    {% for attr in attributes -%}
+    {{attr.name|firstupper}}	{{attr.type|converttype}}	{{validate(attr)}}
+    {% endfor %}
 }
