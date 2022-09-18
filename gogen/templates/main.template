@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-    client := eureka.NewClient(&eureka.Config{
+    eurekaClient := eureka.NewClient(&eureka.Config{
         DefaultZone:           "{{reg_url}}:{{reg_port}}/eureka/",
         App:                   "{{service_name}}",
         Port:                  {{service_port}},
@@ -23,7 +23,7 @@ func main() {
             "SERVICE_VERSION_CODE": "DEFAULT",
         },
     })
-    client.Start()
+    eurekaClient.Start()
 
     srv := api.NewServer()
     http.ListenAndServe(":{{service_port}}", srv)

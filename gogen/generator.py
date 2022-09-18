@@ -8,8 +8,11 @@ def generate_service(service, output_dir):
     """Creates Go project with following folder structure:
       {{ServiceName}}:
           - api
+            - controllers
+            - server.go
           - models
-          - controllers
+          - services
+          - repositories
           - go.mod
           - main.go
       """
@@ -93,7 +96,7 @@ class ServiceGenerator:
 
     def generate_models(self, env, root):
         """
-        Generate models: models.go
+        Generate models folder
                 Args:
                     env (Environment): jinja2 environment used during generation.
                     root (str): path to the dir where application root is located
@@ -114,7 +117,7 @@ class ServiceGenerator:
 
             data = {
                 "dependency": False,
-                "service_name": self.service.name,
+                "service_name": self.service.name.lower(),
                 "name": typedef.name,
                 "attributes": attrs,
                 "id_attr": id_attr,
@@ -122,6 +125,34 @@ class ServiceGenerator:
             }
             model_template.stream(data).dump(os.path.join(models_path,
                                                           typedef.name.lower() + ".go"))
+
+    def generate_repositories(self, env, root):
+        """
+        Generate repositories folder
+                Args:
+                    env (Environment): jinja2 environment used during generation.
+                    root (str): path to the dir where application root is located
+         """
+        repo_path = create_if_missing(os.path.join(root, "repositories"))
+
+        api = self.service.api
+
+        for typedef in api.typedefs:
+
+            id_datatype = "str"
+            for field in typedef.fields:
+                if field.isid:
+                    id_datatype = field.type
+
+            data = {
+                "service_name": self.service.name.lower(),
+                "timestamp": timestamp(),
+                "typedef": typedef.name,
+                "id_datatype": id_datatype
+            }
+            class_template = env.get_template("repositories/repository.template")
+            class_template.stream(data).dump(os.path.join(repo_path,
+                                                          typedef.name.lower() + "_repository.go"))
 
     def generate(self, output_dir):
         """
@@ -159,9 +190,11 @@ class ServiceGenerator:
         # Generate models
         self.generate_models(env, root)
 
+        # Generate repositories
+        self.generate_repositories(env, root)
+
 
 def generate(decl, output_dir, debug):
-    print("Called!")
     print(decl, output_dir)
     generate_service(decl, output_dir)
 
