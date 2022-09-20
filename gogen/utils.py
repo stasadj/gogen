@@ -41,3 +41,39 @@ def convert_complex_type(x):
         type = x.type.name if isinstance(x.type, TypeDef) else x.type
         return '[]' + GO_TYPES.get(type, type)
     return GO_TYPES.get(x, x)
+
+
+from silvera.const import  HTTP_POST
+
+
+def unfold_function_params(func, with_annotations=True):
+    """Creates a string from function parameters
+       Args:
+           func (Function): function whole params are unfolded
+           with_annotations (bool): tells whether special annotations shall be
+               included in string or not
+       """
+    if with_annotations and func.http_verb == HTTP_POST:
+        params = func.params
+        if len(params) == 1:
+            param = params[0]
+            param_type = convert_complex_type(param.type)
+            return "@RequestBody %s %s" % (param_type, param.name)
+
+    params = []
+    for p in func.params:
+        param = ""
+        if with_annotations:
+            if p.url_placeholder:
+                param = "@PathVariable "
+            elif p.query_param:
+                required = "true" if p.default is None else "false"
+                param = '@RequestParam(value="%s", required=%s) ' % (p.name,
+                                                                         required)
+            else:
+                param = "@RequestBody "
+        param += p.name + " "
+        param += convert_complex_type(p.type)
+        params.append(param)
+
+    return ", ".join(params)

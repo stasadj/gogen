@@ -1,7 +1,7 @@
 import os
 from jinja2 import Environment, FileSystemLoader
 from silvera.generator.registration import GeneratorDesc
-from gogen.utils import get_templates_path, timestamp, create_if_missing, convert_complex_type
+from gogen.utils import get_templates_path, timestamp, create_if_missing, convert_complex_type, unfold_function_params
 
 
 def generate_service(service, output_dir):
@@ -38,6 +38,8 @@ class ServiceGenerator:
         env.filters["firstupper"] = lambda x: x[0].upper() + x[1:]
         env.filters["firstlower"] = lambda x: x[0].lower() + x[1:]
         env.filters["converttype"] = lambda x: convert_complex_type(x)
+        env.filters["return_type"] = lambda fnc: convert_complex_type(fnc.ret_type)
+        env.filters["unfold_function_params"] = lambda fnc: unfold_function_params(fnc, False)
 
         return env
 
@@ -103,14 +105,16 @@ class ServiceGenerator:
 
             run_template.stream(d).dump(out)
 
-    def generate_api(self, env, root, d):
+    def generate_server(self, env, root, d):
         """
-        Generates api: server.go
+        Generates api/server.go
                Args:
                    env (Environment): jinja2 environment used during generation.
                    root (str): path to the dir where application root is located
                    d (dict): dict with variables for templates
         """
+        d['typedefs'] = self.get_typedefs(self.service)
+        d['api'] = self.service.api
         api_path = create_if_missing(os.path.join(root, "api"))
         server_template = env.get_template("api/server.template")
         server_template.stream(d).dump((os.path.join(api_path, "server.go")))
@@ -198,6 +202,27 @@ class ServiceGenerator:
         service_template = env.get_template("services/service.template")
         service_template.stream(service_data).dump(os.path.join(services_path, service_name + "_service.go"))
 
+    def generate_controllers(self, env, root):
+        """
+        Generates api/controllers folder
+                Args:
+                    env (Environment): jinja2 environment used during generation.
+                    root (str): path to the dir where application root is located
+         """
+        controllers_path = create_if_missing(os.path.join(root, 'api', "controllers"))
+        service = self.service
+        service_name = service.name.lower()
+
+        controller_data = {
+            "service_name": self.service.name,
+            "api": self.service.api,
+            "timestamp": timestamp(),
+            "typedefs": self.get_typedefs(self.service),
+        }
+
+        controller_template = env.get_template("api/controllers/controller.template")
+        controller_template.stream(controller_data).dump(os.path.join(controllers_path, service_name + "_controller.go"))
+
 
     def generate(self, output_dir):
         """
@@ -229,8 +254,8 @@ class ServiceGenerator:
         self.generate_main(env, root, d)
         self.generate_run_script(output_dir)
 
-        # Generate api
-        self.generate_api(env, root, d)
+        # Generate api/server.go
+        self.generate_server(env, root, d)
 
         # Generate models
         self.generate_models(env, root)
@@ -240,6 +265,9 @@ class ServiceGenerator:
 
         # Generate services
         self.generate_services(env, root)
+
+        # Generate api/controllers
+        self.generate_controllers(env, root)
 
 
 def generate(decl, output_dir, debug):
