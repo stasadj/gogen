@@ -1,10 +1,13 @@
 package main
 
 import (
-    "net/http"
+    "context"
+	"net/http"
     "{{service_name}}/api"
 
     eureka "github.com/xuanbo/eureka-client"
+    "go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func main() {
@@ -25,6 +28,10 @@ func main() {
     })
     eurekaClient.Start()
 
-    srv := api.NewServer()
+    ctx := context.Background()
+    mongoClient, _ := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:27017"))
+    database := mongoClient.Database("{{service_name}}-db")
+
+    srv := api.NewServer(database)
     http.ListenAndServe(":{{service_port}}", srv)
 }
