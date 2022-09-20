@@ -40,12 +40,13 @@ func ({{type_inst}}Repository *{{type_name}}Repository) Delete({{type_inst}}ID {
 	return err
 }
 
-func ({{type_inst}}Repository *{{type_name}}Repository) GetOne({{type_inst}}ID {{id_datatype|converttype}}) interface{} {
-	result := {{typedef|firstlower}}Repository.Collection.FindOne({{type_inst}}Repository.Context, bson.M{"_id": {{type_inst}}ID})
-	return result
+func ({{type_inst}}Repository *{{type_name}}Repository) GetOne({{type_inst}}ID {{id_datatype|converttype}}) (interface{}, error) {
+    var result bson.M
+	err := {{typedef|firstlower}}Repository.Collection.FindOne({{type_inst}}Repository.Context, bson.M{"_id": {{type_inst}}ID}).Decode(&result)
+	return result, err
 }
 
-func ({{type_inst}}Repository *{{type_name}}Repository) GetAll({{type_inst}} *models.{{type_name}}) *[]models.{{type_name}} {
+func ({{type_inst}}Repository *{{type_name}}Repository) GetAll() *[]models.{{type_name}} {
 	cursor, _ := {{type_inst}}Repository.Collection.Find({{type_inst}}Repository.Context, bson.M{})
 	var {{type_inst}}s []models.{{type_name}}
 	_ = cursor.All({{type_inst}}Repository.Context, &{{type_inst}}s)

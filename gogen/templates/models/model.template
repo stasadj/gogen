@@ -14,10 +14,14 @@ package models
     {%- endif -%}
 {%- endmacro -%}
 type {{name}} struct {
-    {% if not id_attr -%}
-    ID		string	`bson:"_id,omitempty" json:"id"`
+    {%- if not id_attr %}
+    ID		    string	`bson:"_id,omitempty" json:"id"`
     {%- endif %}
-    {%- for attr in attributes %}
-    {{attr.name|firstupper}}	{{attr.type|converttype}}	{{validate(attr)}}
+    {%- for attr in attributes -%}
+    {%- if attr.isid %}
+    ID	    {{attr.type|converttype}}	{{validate(attr)}}
+    {%- else %}
+    {{attr.name|firstupper}}	    {{attr.type|converttype}}	{{validate(attr)}}
+    {%- endif -%}
     {%- endfor %}
 }

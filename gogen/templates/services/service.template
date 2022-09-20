@@ -46,7 +46,8 @@ func ({{service_ref}}) Delete{{typedef}}({{typedef|firstlower}}ID {{id_datatype|
 }
 
 func ({{service_ref}}) Get{{typedef}}({{typedef|firstlower}}ID {{id_datatype|converttype}}) interface{} {
-	return {{service_name}}Service.{{typedef}}Repository.GetOne({{typedef|firstlower}}ID)
+	retVal, _ := {{service_name}}Service.{{typedef}}Repository.GetOne({{typedef|firstlower}}ID)
+	return retVal
 }
 {% endfor %}
 

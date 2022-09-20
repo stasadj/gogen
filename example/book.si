@@ -1,0 +1,32 @@
+import "setup.si"
+
+service Bookstore {
+
+    service_registry=ServiceRegistry
+
+    deployment {
+        lang="go"
+    }
+
+    api {
+
+        @crud
+        typedef Book [
+            str isbn
+            @required str title
+            @required str author
+            str category
+            @required double price
+        ]
+
+        @rest(method=GET)
+        list<Book> listBooks()
+
+        @rest(method=GET)
+        bool bookExists(str isbn)
+
+        @rest(method=GET)
+        double bookPrice(str isbn)
+    }
+
+}
