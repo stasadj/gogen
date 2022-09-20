@@ -3,3 +3,100 @@
     Date: {{timestamp}}
 */
 package controllers
+
+import (
+	"encoding/json"
+	"net/http"
+	"{{service_name}}/models"
+	"{{service_name}}/services"
+
+    "github.com/gorilla/mux"
+	"go.mongodb.org/mongo-driver/mongo"
+)
+
+type {{service_name|firstupper}}Controller struct {
+	*services.{{service_name|firstupper}}Service
+}
+
+func New{{service_name|firstupper}}Controller(database *mongo.Database) *{{service_name|firstupper}}Controller {
+	return &{{service_name|firstupper}}Controller{
+	        {{service_name|firstupper}}Service: services.New{{service_name|firstupper}}Service(database),
+	        }
+}
+
+ // Auto-generated CRUD methods
+{%- for typedef, id_datatype, crud_dict in typedefs -%}
+{%- set id_datatype = id_datatype|converttype -%}
+{%- if "@create" in crud_dict %}
+func ({{service_name}}Controller *{{service_name|firstupper}}Controller) Create{{typedef}}() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var {{typedef|lower}} models.{{typedef}}
+		_ = json.NewDecoder(r.Body).Decode(&{{typedef|lower}})
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode({{service_name}}Controller.{{service_name|firstupper}}Service.Create{{typedef}}(&{{typedef|lower}}))
+		err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+}
+{%- endif -%}
+{%- if "@read" in crud_dict %}
+func ({{service_name}}Controller *{{service_name|firstupper}}Controller) Get{{typedef}}() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		params := mux.Vars(r)
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode({{service_name}}Controller.{{service_name|firstupper}}Service.Get{{typedef}}(params["id"]))
+		err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+}
+{%- endif -%}
+{%- if "@update" in crud_dict %}
+func ({{service_name}}Controller *{{service_name|firstupper}}Controller) Update{{typedef}}() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var {{typedef|lower}} models.{{typedef}}
+		_ = json.NewDecoder(r.Body).Decode(&{{typedef|lower}})
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode({{service_name}}Controller.{{service_name|firstupper}}Service.Update{{typedef}}(&{{typedef|lower}}))
+		err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+}
+{%- endif -%}
+{%- if "@delete" in crud_dict %}
+func ({{service_name}}Controller *{{service_name|firstupper}}Controller) Delete{{typedef}}() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		params := mux.Vars(r)
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode({{service_name}}Controller.{{service_name|firstupper}}Service.Delete{{typedef}}(params["id"]))
+		err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+}
+{%- endif -%}
+{% endfor %}
+
+// Auto-generated custom methods
+{%- for function in api.functions %}
+func ({{service_name}}Controller *{{service_name|firstupper}}Controller) {{function.name|firstupper}}() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+	 /*
+	 TODO: Implement this function!!!
+		params := mux.Vars(r)
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode({{service_name}}Controller.{{service_name|firstupper}}Service.{{function.name|firstupper}}())
+		err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	 */
+	}
+}
+{%- endfor %}

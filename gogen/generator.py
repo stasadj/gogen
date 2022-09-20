@@ -214,7 +214,7 @@ class ServiceGenerator:
         service_name = service.name.lower()
 
         controller_data = {
-            "service_name": self.service.name,
+            "service_name": self.service.name.lower(),
             "api": self.service.api,
             "timestamp": timestamp(),
             "typedefs": self.get_typedefs(self.service),

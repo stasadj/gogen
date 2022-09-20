@@ -27,8 +27,8 @@ func New{{service_name|firstupper}}Service(database *mongo.Database) *{{service_
 }
 
 // Auto-generated CRUD methods
-{% for typedef, id_datatype, _ in typedefs -%}
-{%- set id_datatype = id_datatype|converttype -%}
+{%- for typedef, id_datatype, _ in typedefs -%}
+{%- set id_datatype = id_datatype|converttype %}
 func ({{service_ref}}) Create{{typedef}}({{typedef|firstlower}} *models.{{typedef}}) interface{} {
 	retVal,_ := {{service_name}}Service.{{typedef}}Repository.Create({{typedef|firstlower}})
 	return retVal
@@ -39,17 +39,24 @@ func ({{service_ref}}) Update{{typedef}}({{typedef|firstlower}} *models.{{typede
 	return retVal
 }
 
-func ({{service_ref}}) Delete{{typedef}}({{typedef|firstlower}}ID {{id_datatype|converttype}}) {
+func ({{service_ref}}) Delete{{typedef}}({{typedef|firstlower}}ID {{id_datatype|converttype}}) interface{} {
 	err := {{service_name}}Service.{{typedef}}Repository.Delete({{typedef|firstlower}}ID)
 	if err != nil { panic(err) }
+	return "Object with ID: " + {{typedef|firstlower}}ID + " deleted successfully!"
+}
+
+func ({{service_ref}}) Get{{typedef}}({{typedef|firstlower}}ID {{id_datatype|converttype}}) interface{} {
+	return {{service_name}}Service.{{typedef}}Repository.GetOne({{typedef|firstlower}}ID)
 }
 {% endfor %}
 
 
-{%- for function in functions %}
+{% for function in functions %}
+/*
 func ({{service_ref}}) {{function.name|firstupper}}({{function|unfold_function_params}}) {{function|return_type}} {
-	 /*
+
             TODO: Implement this function!!!
-     */
+
 }
+*/
 {% endfor %}

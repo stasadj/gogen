@@ -32,21 +32,21 @@ func (s *Server) routes() {
     {%- for typedef, id_datatype, crud_dict in typedefs -%}
     {%- set id_datatype = id_datatype|converttype -%}
     {%- if "@create" in crud_dict %}
-    s.HandleFunc("/{{typedef|lower}}s", s.OrderController.Create{{typedef}}()).Methods("POST")
+    s.HandleFunc("/{{typedef|lower}}s", s.{{service_name|firstupper}}Controller.Create{{typedef}}()).Methods("POST")
     {%- endif -%}
     {%- if "@read" in crud_dict %}
-    s.HandleFunc("/{{typedef|lower}}s/{id}", s.OrderController.Get{{typedef}}()).Methods("GET")
+    s.HandleFunc("/{{typedef|lower}}s/{id}", s.{{service_name|firstupper}}Controller.Get{{typedef}}()).Methods("GET")
     {%- endif -%}
     {%- if "@update" in crud_dict %}
-    s.HandleFunc("/{{typedef|lower}}s", s.OrderController.Update{{typedef}}()).Methods("PUT")
+    s.HandleFunc("/{{typedef|lower}}s", s.{{service_name|firstupper}}Controller.Update{{typedef}}()).Methods("PUT")
     {%- endif -%}
     {%- if "@delete" in crud_dict %}
-    s.HandleFunc("/{{typedef|lower}}s/{id}", s.OrderController.Delete{{typedef}}()).Methods("DELETE")
+    s.HandleFunc("/{{typedef|lower}}s/{id}", s.{{service_name|firstupper}}Controller.Delete{{typedef}}()).Methods("DELETE")
     {%- endif -%}
     {% endfor %}
 
     // Auto-generated custom routes
     {%- for function in api.functions %}
-    s.HandleFunc("/{{function.name|lower}}", s.OrderController.{{function.name|firstupper}}()).Methods("{{function.http_verb}}")
+    s.HandleFunc("/{{function.name|lower}}", s.{{service_name|firstupper}}Controller.{{function.name|firstupper}}()).Methods("{{function.http_verb}}")
     {%- endfor %}
 }

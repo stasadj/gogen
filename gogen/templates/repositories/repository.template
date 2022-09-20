@@ -22,7 +22,7 @@ type {{type_name}}Repository struct {
 func New{{type_name}}Repository(database *mongo.Database) *{{type_name}}Repository {
 	return &{{type_name}}Repository{
 	        Collection: database.Collection("{{type_inst}}s"),
-	}
+	        }
 }
 
 func ({{type_inst}}Repository *{{type_name}}Repository) Create({{type_inst}} *models.{{type_name}}) (interface{}, error) {
@@ -40,7 +40,12 @@ func ({{type_inst}}Repository *{{type_name}}Repository) Delete({{type_inst}}ID {
 	return err
 }
 
-func ({{type_inst}}Repository *{{type_name}}Repository) FindAll({{type_inst}} *models.{{type_name}}) *[]models.{{type_name}} {
+func ({{type_inst}}Repository *{{type_name}}Repository) GetOne({{type_inst}}ID {{id_datatype|converttype}}) interface{} {
+	result := {{typedef|firstlower}}Repository.Collection.FindOne({{type_inst}}Repository.Context, bson.M{"_id": {{type_inst}}ID})
+	return result
+}
+
+func ({{type_inst}}Repository *{{type_name}}Repository) GetAll({{type_inst}} *models.{{type_name}}) *[]models.{{type_name}} {
 	cursor, _ := {{type_inst}}Repository.Collection.Find({{type_inst}}Repository.Context, bson.M{})
 	var {{type_inst}}s []models.{{type_name}}
 	_ = cursor.All({{type_inst}}Repository.Context, &{{type_inst}}s)
