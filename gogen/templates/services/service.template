@@ -51,8 +51,8 @@ func ({{service_ref}}) Get{{typedef}}({{typedef|firstlower}}ID {{id_datatype|con
 }
 {% endfor %}
 
-
-{% for function in functions %}
+// Auto-generated custom methods
+{%- for function in functions %}
 /*
 func ({{service_ref}}) {{function.name|firstupper}}({{function|unfold_function_params}}) {{function|return_type}} {
 
