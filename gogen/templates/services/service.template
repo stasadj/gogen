@@ -8,46 +8,46 @@ package services
 import (
 	"{{service_name}}/models"
 	"{{service_name}}/repositories"
+
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type {{service_name|firstupper}}Service struct {
 	{%-for typedef, id_datatype, _ in typedefs %}
-	{{typedef|lower}}Repository *repositories.{{typedef|firstupper}}Repository
+	*repositories.{{typedef}}Repository
 	{%- endfor %}
 }
 
-func New{{service_name|firstupper}}Service({%-for typedef, id_datatype, _ in typedefs -%}
-							{{typedef|lower}}Repository *repositories.{{typedef|firstupper}}Repository,
-							  {% endfor -%}
-							) *{{service_name|firstupper}}Service {
-	return &{{service_name|firstupper}}Service{{'{'}}{%-for typedef, id_datatype, _ in typedefs -%}
-								{{typedef|lower}}Repository: {{typedef|lower}}Repository
-								{%- endfor -%}
-								{{'}'}}
+func New{{service_name|firstupper}}Service(database *mongo.Database) *{{service_name|firstupper}}Service {
+	return &{{service_name|firstupper}}Service{{'{'}}
+            {%-for typedef, id_datatype, _ in typedefs %}
+            {{typedef}}Repository: repositories.New{{typedef}}Repository(database),
+            {%- endfor %}
+            {{'}'}}
 }
 
 // Auto-generated CRUD methods
 {% for typedef, id_datatype, _ in typedefs -%}
 {%- set id_datatype = id_datatype|converttype -%}
-func ({{service_ref}}) Create({{typedef|firstlower}} *models.{{typedef|firstupper}}) interface{} {
-	retVal,_ := {{service_name}}Service.{{typedef|firstlower}}Repository.Create({{typedef|firstlower}})
+func ({{service_ref}}) Create{{typedef}}({{typedef|firstlower}} *models.{{typedef}}) interface{} {
+	retVal,_ := {{service_name}}Service.{{typedef}}Repository.Create({{typedef|firstlower}})
 	return retVal
 }
 
-func ({{service_ref}}) Update({{typedef|firstlower}} *models.{{typedef|firstupper}}) interface{} {
-	retVal,_ := {{service_name}}Service.{{typedef|firstlower}}Repository.Update({{typedef|firstlower}})
+func ({{service_ref}}) Update{{typedef}}({{typedef|firstlower}} *models.{{typedef|firstupper}}) interface{} {
+	retVal,_ := {{service_name}}Service.{{typedef}}Repository.Update({{typedef|firstlower}})
 	return retVal
 }
 
-func ({{service_ref}}) Delete({{typedef|firstlower}}ID {{id_datatype|converttype}}) {
-	err := {{service_name}}Service.{{typedef|firstlower}}Repository.Delete({{typedef|firstlower}}ID)
+func ({{service_ref}}) Delete{{typedef}}({{typedef|firstlower}}ID {{id_datatype|converttype}}) {
+	err := {{service_name}}Service.{{typedef}}Repository.Delete({{typedef|firstlower}}ID)
 	if err != nil { panic(err) }
 }
 {% endfor %}
 
 
 {%- for function in functions %}
-func ({{service_ref}}) {{function.name|firstupper}}() {
+func ({{service_ref}}) {{function.name|firstupper}}({{function|unfold_function_params}}) {{function|return_type}} {
 	 /*
             TODO: Implement this function!!!
      */
