@@ -27,7 +27,7 @@ def create_if_missing(dir_path):
 GO_TYPES = {
     'str': 'string',
     'float': 'float32',
-    'double': 'float32',
+    'double': 'float64',
     'bool': 'bool',
     'int': 'int',
     'i16': 'int16',
